@@ -67,6 +67,8 @@ MGL_fig <- ggplot() +
                     name = "Species",
                     drop = T)
 
+ggsave(here('figures', 'daily_presence_by_year.png'), MGL_fig, width = 6.5, height = 6.5, dpi = 600)
+
 ### MGL monthly plot by year and species
 
 MGL_monthly_bar <- all_data %>% 
@@ -78,7 +80,8 @@ MGL_monthly_bar <- all_data %>%
             r_days = sum(rec_effort),
             pc_days = p_days/r_days*100) %>% 
   ungroup() %>% 
-  droplevels()
+  droplevels() %>% 
+  filter(year!=2023 & year!=2024)
 
 MGL_monthly <- ggplot() +
   
@@ -87,7 +90,7 @@ MGL_monthly <- ggplot() +
   
   facet_grid(rows = vars(year), cols = vars(species_name)) +
   
-  #scale_fill_brewer(palette = 'Dark2') +
+  scale_fill_manual(values = cols) +
   
   scale_x_discrete(labels = c('J','F','M','A','M','J','J','A','S','O','N','D')) +
   
@@ -103,6 +106,44 @@ MGL_monthly <- ggplot() +
         panel.grid.minor.y = element_blank(),
         panel.grid.major.y = element_blank())
 
+MGL_monthly
+  
+ggsave(here('figures', 'monthly_presence_by_year.png'), MGL_monthly, width = 6.5, height = 6.5, dpi = 600)
 
+
+### deployment comparison figure
+
+deployment_summary <- all_data %>% 
+  mutate(year = year(rec_date)) %>% 
+  filter(year != 2023 & year != 2024) %>% 
+  filter(station == 'MGL') %>% 
+  group_by(species, species_name, deployment) %>% 
+  summarize(effortdays = sum(rec_effort),
+            presdays = sum(presence, na.rm = TRUE)) %>% 
+  mutate(percentdays = presdays/effortdays*100) %>% 
+  ungroup() %>% 
+  droplevels()
+
+deployment_fig <- ggplot() +
   
+  facet_wrap(~deployment, ncol = 1, strip.position = 'right') +
   
+  geom_col(data = deployment_summary,
+           aes(x = percentdays, y = species_name, fill = species_name),
+           position = position_dodge2(preserve = 'single')) +
+  
+  scale_fill_manual(values = cols) +
+  
+  xlab('percent days present') +
+  ylab('') +
+  
+  scale_x_continuous(expand = c(0, 0),
+                     limits = c(0, 100)) +
+  
+  scale_y_discrete(limits = rev) +
+  
+  theme(axis.ticks.y = element_blank(),
+        legend.position = 'none')
+
+ggsave(here('figures', 'by_deployment.png'), deployment_fig, width = 6.5, height = 6.5, dpi = 600)
+

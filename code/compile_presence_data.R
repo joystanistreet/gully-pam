@@ -122,8 +122,8 @@ depl_summary <- read_csv(here(metadata_folder,'gully_deployment_summary.csv'))
 all_species <- tibble(species = as_factor(c(levels(daily_presence_baleen$species), sp_list_beaked)),
                       group = as_factor(c(rep("baleen", 6), rep("beaked", 4))))
 
-all_species <- tibble(species = as_factor(sp_list_beaked),
-                      group = as_factor(c(rep("beaked", 4))))
+#all_species <- tibble(species = as_factor(sp_list_beaked),
+ #                     group = as_factor(c(rep("beaked", 4))))
 
 
 # compile recording effort
@@ -165,10 +165,10 @@ effort <- depl_summary %>%
 # PART 4: COMBINE EFFORT & PRESENCE RESULTS
 
 # combine baleen and beaked whale results
-all_presence <- bind_rows(daily_presence_beaked)
+all_presence <- bind_rows(daily_presence_baleen, daily_presence_beaked)
 
 # species list
-sp_sci <- c("Zc","Ha","Mb","MmMe")
+sp_sci <- c("Bm","Bp","Mn","Bb","Eg","Ba","Zc","Ha","Mb","MmMe")
 
 # combine effort and presence data to create full dataset
 all_data <- effort %>% 
@@ -191,10 +191,26 @@ all_data <- effort %>%
   mutate(species = factor(species, sp_sci)) %>% 
   
   # add variable for species names
-  mutate(species_name = factor(case_when(species == 'Zc' ~ 'Goose-beaked',
-                                            species == 'Ha' ~ 'Northern bottlenose',
-                                            species == 'Mb' ~ "Sowerby's",
-                                            species == 'MmMe' ~ "True's")))
+  mutate(species_name = factor(case_when(species == 'Bm' ~ 'Blue',
+                                         species == 'Bp' ~ 'Fin',
+                                         species == 'Mn' ~ 'Humpback',
+                                         species == 'Bb' ~ 'Sei',
+                                         species == 'Eg' ~ 'North Atlantic right',
+                                         species == 'Ba' ~ 'Minke',
+                                         species == 'Zc' ~ 'Goose-beaked',
+                                         species == 'Ha' ~ 'Northern bottlenose',
+                                         species == 'Mb' ~ "Sowerby's",
+                                         species == 'MmMe' ~ "True's/Gervais'"),
+                               levels = c('Blue',
+                                          'Fin',
+                                          'Humpback',
+                                          'Sei',
+                                          'North Atlantic right',
+                                          'Minke',
+                                          'Goose-beaked',
+                                          'Northern bottlenose',
+                                          "Sowerby's",
+                                          "True's/Gervais'")))
 
 
 # save as RDS for use in other scripts
