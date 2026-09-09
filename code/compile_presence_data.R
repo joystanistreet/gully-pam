@@ -173,6 +173,10 @@ sp_sci <- c("Bm","Bp","Mn","Bb","Eg","Ba","Zc","Ha","Mb","MmMe")
 # combine effort and presence data to create full dataset
 all_data <- effort %>% 
   full_join(all_presence, by = c('deployment', 'species', 'rec_date')) %>% 
+  
+  # trim extra day for baleen whales in MGL-2016-09
+  filter(rec_date != as_date("2017-11-30")) %>% 
+  
   mutate(presence = case_when(rec_effort == 0 ~ NA,
                               rec_effort == 1 & is.na(presence) ~ 0,
                               .default = presence)) %>% 
